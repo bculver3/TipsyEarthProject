@@ -1,4 +1,4 @@
-WHO_region,Country,Year,All_types,Beer,Wine,Spirits,Other_alcoholic_beverages
+Region,Country,Year,All_types,Beer,Wine,Spirits,Other_alcoholic_beverages
 Eastern Mediterranean,Afghanistan,2000,0,0,0,0,0
 Eastern Mediterranean,Afghanistan,2001,0,0,0,0,0
 Eastern Mediterranean,Afghanistan,2002,0.01,0,0,0,0

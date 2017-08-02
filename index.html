@@ -1,11 +1,39 @@
 <!DOCTYPE html>
-<meta charset="utf-8>
-<link rel=" stylesheet " type="text/css " href="alpha.css ">
-									  
-								
-									 
-<script src="https://d3js.org/d3.v3.min.js "></script>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="alpha.css">
+
 <body>
-											
-<script src="alpha.js "></script>
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+
+	<div>
+		<select id="dropregion">
+			<option value ="default-option">Select Region</option>
+		</select>
+		<select id="dropcountry">
+			<option value ="default-option">Select Country</option>
+		</select>
+	</div>
+
+
+
+
+	<script src="alpha.js"></script>
 </body>
+
+
+<!--
+
+To-Do
+- Dropdowns
+	- only populate first item in list
+- Highlight on hover
+- Labels to parallel coordinates
+- Store max and min dimension values
+- Dimenion brush and zoom
+- Dropdown selection function
+- Function for stacked bar init
+- Linked highlight on hover
+- Redraw stacked bars on parcoord range change
+- Add weight calculation
+
+-->

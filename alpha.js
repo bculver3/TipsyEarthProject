@@ -22,17 +22,69 @@ var svg = d3.select("body").append("svg")
 	.append("g")
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+var dropcountry = d3.select('#dropcountry'),
+	dropregion = d3.select('#dropregion');
+
+d3.csv("stackbars.csv", function (error, world) {
+	var regions = d3.nest().key(function (d) {
+		return d.Region;
+	}).entries(world);
+
+	regions = regions.sort(function (a, b) {
+		if (a.key < b.key) return -1;
+		if (a.key > b.key) return 1;
+		return 0;
+	})
+
+	dropregion.selectAll('option')
+		.data(regions, function (d) {
+			return d;
+		})
+		.enter()
+		.append("option")
+		.attr("value", function (d) {
+			return d.key;
+		})
+		.text(function (d) {
+			return d.key;
+		});
+
+
+})
 
 d3.csv("parcoords.csv", function (error, world) {
-	//setting the dimension back to the unique values for the year
-	// Extract the list of dimensions and create a scale for each.
+
+	var countries = d3.nest()
+		.key(function (d) {
+			return d.Country;
+		}).entries(world);
+
+	dropcountry.selectAll('option')
+		.data(countries, function (d) {
+			return d;
+		})
+		.enter()
+		.append("option")
+		.attr("value", function (d) {
+			return d.key;
+		})
+		.text(function (d) {
+			return d.key;
+		});
+
+
+
 	x.domain(dimensions = d3.keys(world[0]).filter(function (d) {
-		return d != "Country" && d != "Beverage Types" && (y[d] = d3.scale.linear()
+		return d != "Country" && d != "Beverage_Types" && (y[d] = d3.scale.linear()
 			.domain(d3.extent(world, function (p) {
 				return +p[d];
 			}))
 			.range([height, 0]));
 	}));
+
+	world = world.filter(function (d) {
+		return d.Beverage_Types == "All types";
+	})
 
 	// Add grey background lines for context.
 	background = svg.append("g")
