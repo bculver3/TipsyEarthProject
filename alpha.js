@@ -22,11 +22,12 @@ var svg = d3.select("body").append("svg")
 	.append("g")
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-d3.csv("data.csv", function (error, world) {
 
+d3.csv("parcoords.csv", function (error, world) {
+	//setting the dimension back to the unique values for the year
 	// Extract the list of dimensions and create a scale for each.
 	x.domain(dimensions = d3.keys(world[0]).filter(function (d) {
-		return d != "name" && (y[d] = d3.scale.linear()
+		return d != "Country" && d != "Beverage Types" && (y[d] = d3.scale.linear()
 			.domain(d3.extent(world, function (p) {
 				return +p[d];
 			}))
