@@ -4,8 +4,8 @@ var margin = {
 		bottom: 10,
 		left: 10
 	},
-	width = 960 - margin.left - margin.right,
-	height = 500 - margin.top - margin.bottom;
+	width = 2500 - margin.left - margin.right,
+	height = 2000 - margin.top - margin.bottom;
 
 var x = d3.scale.ordinal().rangePoints([0, width], 1),
 	y = {},
@@ -26,13 +26,16 @@ var dropcountry = d3.select('#dropcountry'),
 	dropregion = d3.select('#dropregion'),
 	selCount = {};
 
+var regions = {},
+	countries = {};
+
 d3.csv("stackbars.csv", function (error, world) {
 
-	var regions = d3.nest().key(function (d) {
+	regions = d3.nest().key(function (d) {
 		return d.Region;
 	}).entries(world);
 
-	var countries = d3.nest().key(function (d) {
+	countries = d3.nest().key(function (d) {
 		return d.Country;
 	}).entries(world);
 
@@ -91,19 +94,27 @@ d3.csv("stackbars.csv", function (error, world) {
 				return d.key;
 			})
 	})
-
-
-
 })
 
 d3.csv("parcoords.csv", function (error, world) {
-
 	x.domain(dimensions = d3.keys(world[0]).filter(function (d) {
-		return d != "Country" && d != "Beverage_Types" && (y[d] = d3.scale.linear()
-			.domain(d3.extent(world, function (p) {
-				return +p[d];
-			}))
-			.range([height, 0]));
+
+		if (d === "Beverage_Types" || d === "Region") {
+			return false;
+		} else if (d === "Country") {
+			y[d] = d3.scale.ordinal()
+				.domain(world.map(function (p) {
+					return p[d];
+				}))
+				.rangePoints([height, 0]);
+		} else {
+			y[d] = d3.scale.linear()
+				.domain(d3.extent(world, function (p) {
+					return +p[d];
+				}))
+				.range([height, 0]);
+		}
+		return true;
 	}));
 
 	world = world.filter(function (d) {
@@ -124,7 +135,9 @@ d3.csv("parcoords.csv", function (error, world) {
 		.selectAll("path")
 		.data(world)
 		.enter().append("path")
-		.attr("d", path);
+		.attr("d", path)
+
+	//add hover action: create country label on left side of vis	
 
 	// Add a group element for each dimension.
 	var g = svg.selectAll(".dimension")
@@ -171,7 +184,8 @@ d3.csv("parcoords.csv", function (error, world) {
 	g.append("g")
 		.attr("class", "axis")
 		.each(function (d) {
-			d3.select(this).call(axis.scale(y[d]));
+			d3.select(this).call(axis.scale(y[d])
+				.outerTickSize(5));
 		})
 		.append("text")
 		.style("text-anchor", "middle")
@@ -184,7 +198,9 @@ d3.csv("parcoords.csv", function (error, world) {
 	g.append("g")
 		.attr("class", "brush")
 		.each(function (d) {
-			d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brushstart", brushstart).on("brush", brush));
+			d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d])
+				.on("brushstart", brushstart)
+				.on("brush", brush));
 		})
 		.selectAll("rect")
 		.attr("x", -8)
