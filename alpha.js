@@ -23,11 +23,17 @@ var svg = d3.select("body").append("svg")
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 var dropcountry = d3.select('#dropcountry'),
-	dropregion = d3.select('#dropregion');
+	dropregion = d3.select('#dropregion'),
+	selCount = {};
 
 d3.csv("stackbars.csv", function (error, world) {
+
 	var regions = d3.nest().key(function (d) {
 		return d.Region;
+	}).entries(world);
+
+	var countries = d3.nest().key(function (d) {
+		return d.Country;
 	}).entries(world);
 
 	regions = regions.sort(function (a, b) {
@@ -37,9 +43,7 @@ d3.csv("stackbars.csv", function (error, world) {
 	})
 
 	dropregion.selectAll('option')
-		.data(regions, function (d) {
-			return d;
-		})
+		.data(regions)
 		.enter()
 		.append("option")
 		.attr("value", function (d) {
@@ -48,31 +52,51 @@ d3.csv("stackbars.csv", function (error, world) {
 		.text(function (d) {
 			return d.key;
 		});
+
+	dropcountry.selectAll('option')
+		.data(countries)
+		.enter()
+		.append("option")
+		.attr("value", function (d) {
+			return d.key;
+		})
+		.text(function (d) {
+			return d.key;
+		});
+
+	dropregion.on('change', function () {
+
+		var selected = this.value;
+
+		selCount = world.filter(function (d) {
+			return d['Region'] == selected;
+		})
+
+		selCount = d3.nest().key(function (d) {
+			return d.Country;
+		}).entries(selCount);
+
+		console.log(selCount);
+
+		dropcountry.selectAll('option').remove();
+
+		dropcountry.selectAll('option')
+			.data(selCount)
+			.enter()
+			.append('option')
+			.attr('value', function (d) {
+				return d.key;
+			})
+			.text(function (d) {
+				return d.key;
+			})
+	})
+
 
 
 })
 
 d3.csv("parcoords.csv", function (error, world) {
-
-	var countries = d3.nest()
-		.key(function (d) {
-			return d.Country;
-		}).entries(world);
-
-	dropcountry.selectAll('option')
-		.data(countries, function (d) {
-			return d;
-		})
-		.enter()
-		.append("option")
-		.attr("value", function (d) {
-			return d.key;
-		})
-		.text(function (d) {
-			return d.key;
-		});
-
-
 
 	x.domain(dimensions = d3.keys(world[0]).filter(function (d) {
 		return d != "Country" && d != "Beverage_Types" && (y[d] = d3.scale.linear()
