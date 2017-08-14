@@ -54,7 +54,8 @@ d3.csv("stackbars.csv", function (error, world) {
 		})
 		.text(function (d) {
 			return d.key;
-		});
+		})
+		.on("click", updatePolar(this.value));
 
 	dropcountry.selectAll('option')
 		.data(countries)
@@ -79,8 +80,6 @@ d3.csv("stackbars.csv", function (error, world) {
 			return d.Country;
 		}).entries(selCount);
 
-		console.log(selCount);
-
 		dropcountry.selectAll('option').remove();
 
 		dropcountry.selectAll('option')
@@ -99,14 +98,8 @@ d3.csv("stackbars.csv", function (error, world) {
 d3.csv("parcoords.csv", function (error, world) {
 	x.domain(dimensions = d3.keys(world[0]).filter(function (d) {
 
-		if (d === "Beverage_Types" || d === "Region") {
+		if (d === "Country" || d === "Beverage_Types" || d === "Region") {
 			return false;
-		} else if (d === "Country") {
-			y[d] = d3.scale.ordinal()
-				.domain(world.map(function (p) {
-					return p[d];
-				}))
-				.rangePoints([height, 0]);
 		} else {
 			y[d] = d3.scale.linear()
 				.domain(d3.extent(world, function (p) {
@@ -120,6 +113,7 @@ d3.csv("parcoords.csv", function (error, world) {
 	world = world.filter(function (d) {
 		return d.Beverage_Types == "All types";
 	})
+
 
 	// Add grey background lines for context.
 	background = svg.append("g")
@@ -205,6 +199,8 @@ d3.csv("parcoords.csv", function (error, world) {
 		.selectAll("rect")
 		.attr("x", -8)
 		.attr("width", 16);
+
+
 });
 
 function position(d) {
@@ -240,4 +236,72 @@ function brush() {
 			return extents[i][0] <= d[p] && d[p] <= extents[i][1];
 		}) ? null : "none";
 	});
+
+	/*	foreground.append('text')
+			.data(world)
+			.attr("transform", function (d) {
+				console.log(d['2014'])
+				return "translate(" + d['2014'] + "," + (width + 20) + ")";
+			})
+			.attr("dx", ".35em")
+			.attr("text-anchor", "start")
+			.attr("fill", "steelblue")
+			.text("Countries");*/
+}
+
+function updatePolar(region, data, svg, g) {
+	var selected = data.filter(function (d) {
+		return d.Region == region;
+	})
+
+	var notSelected = data.filter(function (d) {
+		return d.Region != region;
+	})
+
+	svg.selectAll("path").remove();
+	// remove everything
+
+	g.append("g")
+		.attr("class", "axis")
+		.each(function (d) {
+			d3.select(this).call(d3.axisLeft(y[d]));
+		})
+		.append("text")
+		.style("text-anchor", "middle")
+		.attr("y", -9)
+		.text(function (d) {
+			return d;
+		});
+
+	g.append("g")
+		.attr("class", "brush")
+		.each(function (d) {
+			d3.select(this)
+				.call(y[d].brush = d3.brushY()
+					.extent([[-8, 0], [8, height]])
+					.on("brush start", brushstart)
+					.on("brush", brush_parallel_chart)
+				);
+		})
+		.selectAll("rect")
+		.attr("x", -8)
+		.attr("width", 16);
+
+
+	svg.append("g")
+		.attr("class", "background")
+		.selectAll("path")
+		.data(notSelectCountries)
+		.enter().append("path")
+		.attr("d", path);
+	// redraw all irrelevant countries as gray lines
+
+	svg.append("g")
+		.attr("class", "foreground")
+		.selectAll("path")
+		.data(selectCountries)
+		.enter().append("path")
+		.attr("d", path)
+		.on("mouseover", highlight);
+	// and redraw all selected countries as blue lines
 }
