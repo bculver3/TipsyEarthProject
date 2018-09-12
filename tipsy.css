@@ -1,0 +1,8 @@
+.countries {
+  fill: none;
+}
+.continents {
+  fill: none;
+  stroke: #fff;
+  stroke-linejoin: round;
+}
