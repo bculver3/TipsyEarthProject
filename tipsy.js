@@ -1,26 +1,52 @@
-var width = 960;
-var height = 600;
+var width = 960,
+    height = 500;
 
-var svg = d3.select("svg"),
-    width = +svg.attr("width"),
-    height = +svg.attr("height");
-
-var path = d3.geoPath();
-var projection = d3.geoNaturalEarth()
-    .scale(width / 2 / Math.PI)
+var projection = d3.geo.naturalEarth()
+    .scale(167)
     .translate([width / 2, height / 2])
-var path = d3.geoPath()
+    .precision(.1);
+
+var path = d3.geo.path()
     .projection(projection);
 
-// Data and color scale
-var data = d3.map();
-var colorScheme = d3.schemeReds[6];
-colorScheme.unshift("#eee")
-var colorScale = d3.scaleThreshold()
-    .domain([1, 6, 11, 26, 101, 1001])
-    .range(colorScheme);
+var graticule = d3.geo.graticule();
 
-d3.queue()
-    .defer(d3.json, "http://enjalot.github.io/wwsd/data/world/world-110m.geojson")
-    .defer(d3.csv, "data.csv", function(d) { data.set(d., d.Liters); })
-    .await(ready);
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+svg.append("defs").append("path")
+    .datum({type: "Sphere"})
+    .attr("id", "sphere")
+    .attr("d", path);
+
+svg.append("use")
+    .attr("class", "stroke")
+    .attr("xlink:href", "#sphere");
+
+svg.append("use")
+    .attr("class", "fill")
+    .attr("xlink:href", "#sphere");
+
+svg.append("path")
+    .datum(graticule)
+    .attr("class", "graticule")
+    .attr("d", path);
+
+
+
+d3.json("data.json", function(error, world) {
+  if (error) throw error;
+
+  svg.insert("path", ".graticule")
+      .datum(topojson.feature(world, world.objects.land))
+      .attr("class", "land")
+      .attr("d", path);
+
+  svg.insert("path", ".graticule")
+      .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
+      .attr("class", "boundary")
+      .attr("d", path);
+});
+
+d3.select(self.frameElement).style("height", height + "px");
